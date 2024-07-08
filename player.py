@@ -1,10 +1,11 @@
 import pygame
 
+from settings import *
 from utils import *
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, pos, groups, obstacle_sprites):
+    def __init__(self, pos, groups, obstacle_sprites, create_weapon, destroy_weapon):
         super().__init__(groups)
 
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
@@ -23,6 +24,15 @@ class Player(pygame.sprite.Sprite):
         self.attacking = False
         self.attack_cooldown = 400
         self.attack_time = None
+
+        # Weapon setup
+        self.create_weapon = create_weapon
+        self.destroy_weapon = destroy_weapon
+        self.weapon_index = 0
+        self.weapon = list(weapon_data.keys())[self.weapon_index]
+        self.can_switch_weapon = True
+        self.weapon_switch_time = None
+        self.switch_duration = 200
 
         self.obstacle_sprites = obstacle_sprites
     
@@ -71,13 +81,24 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_SPACE]:
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
+                self.create_weapon()
                 print('Attack')
             
             # Magic input
-            if keys[pygame.K_q]:
+            if keys[pygame.K_f]:
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
+                self.create_weapon()
                 print('Magic attack')
+            
+            if keys[pygame.K_q] and self.can_switch_weapon:
+                self.can_switch_weapon = False
+                self.weapon_switch_time = pygame.time.get_ticks()
+
+                self.weapon_index = (self.weapon_index + 1) % len(list(weapon_data.keys()))
+                self.weapon = list(weapon_data.keys())[self.weapon_index]
+                print(self.weapon)
+
     
     def get_status(self):
         # Check for idle status
@@ -148,6 +169,11 @@ class Player(pygame.sprite.Sprite):
         if self.attacking:
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.attacking = False
+                self.destroy_weapon()
+        
+        if not self.can_switch_weapon:
+            if current_time - self.weapon_switch_time >= self.switch_duration:
+                self.can_switch_weapon = True
 
     def update(self):
         self.input()
