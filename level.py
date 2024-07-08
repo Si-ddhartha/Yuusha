@@ -5,6 +5,7 @@ from settings import *
 from utils import *
 from debug import *
 
+from ui import UI
 from tile import Tile
 from player import Player
 from weapon import Weapon
@@ -14,6 +15,9 @@ class Level:
     def __init__(self):
         # Get the display surface
         self.display_surface = pygame.display.get_surface()
+
+        # UI setup
+        self.ui = UI()
 
         # Sprite group setup
         self.visible_sprites = YSortCameraGroup()
@@ -68,7 +72,7 @@ class Level:
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        debug(self.player.status)
+        self.ui.display(self.player)
 
 
 # Customizing the Group class
