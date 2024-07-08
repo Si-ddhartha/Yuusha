@@ -1,39 +1,105 @@
 import pygame
 
+from utils import *
+
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, pos, groups, obstacle_sprites):
         super().__init__(groups)
 
-        self.image = pygame.image.load('../graphics/test/mc.png').convert_alpha()
+        self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox = self.rect.inflate(0, -25)
 
+        # Graphics setup
+        self.import_player_assets()
+        self.status = 'down'
+        self.frame_index = 0
+        self.animation_speed = 0.15
+
+        # Movement attributes
         self.direction = pygame.math.Vector2()
         self.speed = 5
+        self.attacking = False
+        self.attack_cooldown = 400
+        self.attack_time = None
 
         self.obstacle_sprites = obstacle_sprites
     
-    def input(self):
-        keys = pygame.key.get_pressed()  # Get keys that are pressed
+    def import_player_assets(self):
+        player_path = '../graphics/player/'
 
-        if keys[pygame.K_UP]:
-            self.direction.y = -1
-        
-        elif keys[pygame.K_DOWN]:
-            self.direction.y = 1
-        
-        else:
-            self.direction.y = 0       # Else the player will keep on moving
-        
-        if keys[pygame.K_LEFT]:
-            self.direction.x = -1
-        
-        elif keys[pygame.K_RIGHT]:
-            self.direction.x = 1
-        
-        else:
+        self.animations = {
+            'up': [], 'down': [], 'left': [], 'right': [],
+            'up_idle': [], 'down_idle': [], 'left_idle': [], 'right_idle': [],
+            'up_attack': [], 'down_attack': [], 'left_attack': [], 'right_attack': [],
+        }
+
+        for animation in self.animations.keys():
+            full_path = player_path + animation
+
+            self.animations[animation] = import_folder(full_path)
+    
+    def input(self):
+        if not self.attacking:
+            keys = pygame.key.get_pressed()  # Get keys that are pressed
+
+            # Movement input
+            if keys[pygame.K_UP]:
+                self.direction.y = -1
+                self.status = 'up'
+            
+            elif keys[pygame.K_DOWN]:
+                self.direction.y = 1
+                self.status = 'down'
+            
+            else:
+                self.direction.y = 0       # Else the player will keep on moving
+            
+            if keys[pygame.K_LEFT]:
+                self.direction.x = -1
+                self.status = 'left'
+            
+            elif keys[pygame.K_RIGHT]:
+                self.direction.x = 1
+                self.status = 'right'
+            
+            else:
+                self.direction.x = 0
+            
+            # Attack input
+            if keys[pygame.K_SPACE]:
+                self.attacking = True
+                self.attack_time = pygame.time.get_ticks()
+                print('Attack')
+            
+            # Magic input
+            if keys[pygame.K_q]:
+                self.attacking = True
+                self.attack_time = pygame.time.get_ticks()
+                print('Magic attack')
+    
+    def get_status(self):
+        # Check for idle status
+        if self.direction.x == 0 and self.direction.y == 0:
+            if not 'idle' in self.status and not 'attack' in self.status:
+                self.status += '_idle'
+
+        # Check for attacking status
+        if self.attacking:
             self.direction.x = 0
+            self.direction.y = 0
+
+            if not 'attack' in self.status:
+                if 'idle' in self.status:
+                    self.status = self.status.replace('_idle', '_attack')
+                
+                else:
+                    self.status += '_attack'
+        
+        else:
+            if 'attack' in self.status:
+                self.status = self.status.replace('_attack', '')
     
     def move(self, speed):
         if self.direction.magnitude() != 0:
@@ -46,6 +112,16 @@ class Player(pygame.sprite.Sprite):
         self.collision('vertical')
         
         self.rect.center = self.hitbox.center
+
+    def animate(self):
+        animation = self.animations[self.status]
+
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(animation):
+            self.frame_index = 0
+        
+        self.image = animation[int(self.frame_index)]
+        self.rect = self.image.get_rect(center = self.hitbox.center)
 
     def collision(self, direction):
         if direction == 'horizontal':
@@ -65,7 +141,17 @@ class Player(pygame.sprite.Sprite):
                     
                     if self.direction.y < 0:
                         self.hitbox.top = sprite.hitbox.bottom
+        
+    def cooldown(self):
+        current_time = pygame.time.get_ticks()
+
+        if self.attacking:
+            if current_time - self.attack_time >= self.attack_cooldown:
+                self.attacking = False
 
     def update(self):
         self.input()
         self.move(self.speed)
+        self.cooldown()
+        self.get_status()
+        self.animate()

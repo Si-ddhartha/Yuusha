@@ -3,6 +3,7 @@ from random import choice
 
 from settings import *
 from utils import *
+from debug import *
 
 from tile import Tile
 from player import Player
@@ -49,11 +50,12 @@ class Level:
                             object_img = graphics['objects'][int(col)]
                             Tile((x, y), [self.visible_sprites, self.obstacle_sprites], 'object', object_img)
 
-        self.player = Player((2000, 1430), [self.visible_sprites], self.obstacle_sprites)
+        self.player = Player((1965, 1400), [self.visible_sprites], self.obstacle_sprites)
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
+        debug(self.player.status)
 
 
 # Customizing the Group class
