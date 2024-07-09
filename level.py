@@ -58,10 +58,13 @@ class Level:
                             object_img = graphics['objects'][int(col)]
                             Tile((x, y), [self.visible_sprites, self.obstacle_sprites], 'object', object_img)
 
-        self.player = Player((1965, 1400), [self.visible_sprites], self.obstacle_sprites, self.create_weapon, self.destroy_weapon)
+        self.player = Player((1965, 1400), [self.visible_sprites], self.obstacle_sprites, self.create_weapon, self.destroy_weapon, self.create_magic)
 
     def create_weapon(self):
         self.current_attack = Weapon(self.player, [self.visible_sprites])
+
+    def create_magic(self, style, strength, cost):
+        print(style)
 
     def destroy_weapon(self):
         if self.current_attack:

@@ -17,8 +17,15 @@ class UI:
         self.weapon_graphics = []
         for weapon in weapon_data.values():
             path = weapon['graphic']
-            weapon = pygame.image.load(path).convert_alpha()
-            self.weapon_graphics.append(weapon)
+            weapon_image = pygame.image.load(path).convert_alpha()
+            self.weapon_graphics.append(weapon_image)
+
+        # Pre-loading magic graphics
+        self.magic_graphics = []
+        for magic in magic_data.values():
+            path = magic['graphic']
+            magic_image = pygame.image.load(path).convert_alpha()
+            self.magic_graphics.append(magic_image)
 
     def draw_bar(self, bg_rect, curr_amount, max_amount, color):
         # Draw bg
@@ -65,6 +72,14 @@ class UI:
 
         self.display_surface.blit(weapon_surf, weapon_rect)
 
+    def draw_magic(self, curr_magic_index, is_switching):
+        bg_rect = self.draw_selection_box(80, 634, is_switching)
+
+        magic_surf = self.magic_graphics[curr_magic_index]
+        magic_rect = magic_surf.get_rect(center = bg_rect.center)
+
+        self.display_surface.blit(magic_surf, magic_rect)
+
     def display(self, player):
         self.draw_bar(self.health_bar, player.health, player.stats['max_health'], HEALTH_COLOR)
         self.draw_bar(self.energy_bar, player.energy, player.stats['max_energy'], ENERGY_COLOR)
@@ -72,4 +87,4 @@ class UI:
         self.draw_exp(player.exp)
 
         self.draw_weapon(player.weapon_index, not player.can_switch_weapon) # Weapon box
-        # self.draw_selection_box(80, 634) # Magic box
+        self.draw_magic(player.magic_index, not player.can_switch_magic) # Magic box
