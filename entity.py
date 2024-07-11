@@ -1,4 +1,5 @@
 import pygame
+from math import sin
 
 class Entity(pygame.sprite.Sprite):
 
@@ -39,3 +40,13 @@ class Entity(pygame.sprite.Sprite):
                     
                     if self.direction.y < 0:
                         self.hitbox.top = sprite.hitbox.bottom
+
+    # Returns value of alpha when hit
+    # for flicker effect
+    def alpha_value(self):
+        val = sin(pygame.time.get_ticks())
+
+        if val >= 0:
+            return 255
+        else:
+            return 0

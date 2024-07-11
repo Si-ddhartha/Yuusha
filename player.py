@@ -162,7 +162,7 @@ class Player(Entity):
         current_time = pygame.time.get_ticks()
 
         if self.attacking:
-            if current_time - self.attack_time >= self.attack_cooldown:
+            if current_time - self.attack_time >= self.attack_cooldown + weapon_data[self.weapon]['cooldown']:
                 self.attacking = False
                 self.destroy_weapon()
         
@@ -173,6 +173,9 @@ class Player(Entity):
         if not self.can_switch_magic:
             if current_time - self.magic_switch_time >= self.switch_duration:
                 self.can_switch_magic = True
+
+    def get_full_attack_stat(self):
+        return self.stats['attack'] + weapon_data[self.weapon]['damage']
 
     def update(self):
         self.input()
