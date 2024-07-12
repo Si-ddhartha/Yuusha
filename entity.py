@@ -50,3 +50,10 @@ class Entity(pygame.sprite.Sprite):
             return 255
         else:
             return 0
+
+    def flicker(self):
+        if not self.vulnerable:
+            alpha = self.alpha_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)

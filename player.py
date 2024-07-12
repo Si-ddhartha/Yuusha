@@ -52,6 +52,11 @@ class Player(Entity):
         self.speed = self.stats['speed']
         self.exp = 123456
 
+        # Invincibility setup
+        self.vulnerable = True
+        self.hurt_time = None
+        self.invincibility_duration = 500
+
         self.obstacle_sprites = obstacle_sprites
     
     def import_player_assets(self):
@@ -157,6 +162,9 @@ class Player(Entity):
         
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
+
+        # Flicker effect on getting hit
+        self.flicker()
         
     def cooldown(self):
         current_time = pygame.time.get_ticks()
@@ -173,6 +181,10 @@ class Player(Entity):
         if not self.can_switch_magic:
             if current_time - self.magic_switch_time >= self.switch_duration:
                 self.can_switch_magic = True
+
+        if not self.vulnerable:
+            if current_time - self.hurt_time >= self.invincibility_duration:
+                self.vulnerable = True
 
     def get_full_attack_stat(self):
         return self.stats['attack'] + weapon_data[self.weapon]['damage']

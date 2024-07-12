@@ -7,7 +7,7 @@ from utils import *
 
 class Enemy(Entity):
 
-    def __init__(self, monster_name, pos, groups, obstacle_sprites):
+    def __init__(self, monster_name, pos, groups, obstacle_sprites, hit_player):
         super().__init__(groups)
 
         self.sprite_type = 'enemy'
@@ -38,6 +38,7 @@ class Enemy(Entity):
         self.can_attack = True
         self.attack_cooldown = 500
         self.attack_time = None
+        self.hit_player = hit_player
 
         # Invincibility setup
         self.vulnerable = True
@@ -82,7 +83,7 @@ class Enemy(Entity):
 
     def actions(self, player):
         if self.status == 'attack':
-            print('enemy attacking')
+            self.hit_player(self.attack_damage, self.attack_type)
         
         elif self.status == 'move':
             self.direction = self.get_player_direction_distance(player)[0]
@@ -104,11 +105,7 @@ class Enemy(Entity):
         self.rect = self.image.get_rect(center = self.hitbox.center)
 
         # Flicker effect on getting hit
-        if not self.vulnerable:
-            alpha = self.alpha_value()
-            self.image.set_alpha(alpha)
-        else:
-            self.image.set_alpha(255)
+        self.flicker()
 
     def cooldown(self):
         current_time = pygame.time.get_ticks()
