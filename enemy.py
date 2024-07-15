@@ -7,7 +7,7 @@ from utils import *
 
 class Enemy(Entity):
 
-    def __init__(self, monster_name, pos, groups, obstacle_sprites, hit_player):
+    def __init__(self, monster_name, pos, groups, obstacle_sprites, hit_player, death_effect):
         super().__init__(groups)
 
         self.sprite_type = 'enemy'
@@ -17,6 +17,7 @@ class Enemy(Entity):
         self.import_graphics(monster_name)
         self.status = 'idle'
         self.image = self.animations[self.status][self.frame_index]
+        self.death_effect = death_effect
 
         # Movement setup
         self.rect = self.image.get_rect(topleft = pos)
@@ -136,6 +137,7 @@ class Enemy(Entity):
 
     def check_death(self):
         if self.health <= 0:
+            self.death_effect(self.rect.center, self.monster_name)
             self.kill()
 
     def update(self):
