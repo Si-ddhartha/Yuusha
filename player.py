@@ -47,7 +47,7 @@ class Player(Entity):
             'magic': 4,
             'speed': 5
         }
-        self.health = self.stats['max_health']
+        self.health = self.stats['max_health'] * 0.5
         self.energy = self.stats['max_energy']
         self.speed = self.stats['speed']
         self.exp = 123456
@@ -56,6 +56,10 @@ class Player(Entity):
         self.vulnerable = True
         self.hurt_time = None
         self.invincibility_duration = 500
+
+        # Energy recovery timer
+        self.energy_recovery_interval = 2000
+        self.energy_recovery_timer = pygame.time.get_ticks()
 
         self.obstacle_sprites = obstacle_sprites
     
@@ -189,9 +193,21 @@ class Player(Entity):
     def get_full_attack_stat(self):
         return self.stats['attack'] + weapon_data[self.weapon]['damage']
 
+    def replenish_energy(self):
+        current_time = pygame.time.get_ticks()
+
+        if self.energy < self.stats['max_energy']:
+            if current_time - self.energy_recovery_timer >= self.energy_recovery_interval:
+                recovery_rate = 0.5 * (self.energy / self.stats['max_energy'])
+                self.energy += recovery_rate
+                self.energy = min(self.energy, self.stats['max_energy'])
+
+                self.energy_recovery_timer = current_time
+
     def update(self):
         self.input()
         self.move(self.speed)
         self.cooldown()
         self.get_status()
         self.animate()
+        self.replenish_energy()
