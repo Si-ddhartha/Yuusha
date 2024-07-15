@@ -67,6 +67,7 @@ class ParticleEffect(pygame.sprite.Sprite):
         self.frame_index = 0
         self.animation_speed = 0.15
         self.frames = animation_frames
+        self.sprite_type = 'magic'
 
         self.image = self.frames[self.frame_index]
         self.rect = self.image.get_rect(center = pos)

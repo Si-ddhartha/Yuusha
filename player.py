@@ -58,7 +58,7 @@ class Player(Entity):
         self.invincibility_duration = 500
 
         # Energy recovery timer
-        self.energy_recovery_interval = 2000
+        self.energy_recovery_interval = 1500
         self.energy_recovery_timer = pygame.time.get_ticks()
 
         self.obstacle_sprites = obstacle_sprites
@@ -82,22 +82,22 @@ class Player(Entity):
             keys = pygame.key.get_pressed()  # Get keys that are pressed
 
             # Movement input
-            if keys[pygame.K_UP]:
+            if keys[pygame.K_UP] or keys[pygame.K_w]:
                 self.direction.y = -1
                 self.status = 'up'
             
-            elif keys[pygame.K_DOWN]:
+            elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
                 self.direction.y = 1
                 self.status = 'down'
             
             else:
                 self.direction.y = 0       # Else the player will keep on moving
             
-            if keys[pygame.K_LEFT]:
+            if keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 self.direction.x = -1
                 self.status = 'left'
             
-            elif keys[pygame.K_RIGHT]:
+            elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
                 self.direction.x = 1
                 self.status = 'right'
             
@@ -109,7 +109,6 @@ class Player(Entity):
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
                 self.create_weapon()
-                print('Attack')
             
             # Magic input
             if keys[pygame.K_f]:
@@ -124,7 +123,6 @@ class Player(Entity):
 
                 self.weapon_index = (self.weapon_index + 1) % len(list(weapon_data.keys()))
                 self.weapon = list(weapon_data.keys())[self.weapon_index]
-                print(self.weapon)
 
             # Switch magic
             if keys[pygame.K_e] and self.can_switch_magic:
@@ -133,7 +131,6 @@ class Player(Entity):
 
                 self.magic_index = (self.magic_index + 1) % len(list(magic_data.keys()))
                 self.magic = list(magic_data.keys())[self.magic_index]
-                print(self.magic)
     
     def get_status(self):
         # Check for idle status
@@ -190,15 +187,19 @@ class Player(Entity):
             if current_time - self.hurt_time >= self.invincibility_duration:
                 self.vulnerable = True
 
-    def get_full_attack_stat(self):
-        return self.stats['attack'] + weapon_data[self.weapon]['damage']
+    def get_full_attack_stat(self, attack_type):
+        if attack_type == 'weapon':
+            return self.stats['attack'] + weapon_data[self.weapon]['damage']
+        
+        else:
+            return self.stats['magic'] + magic_data[self.magic]['strength']
 
     def replenish_energy(self):
         current_time = pygame.time.get_ticks()
 
         if self.energy < self.stats['max_energy']:
             if current_time - self.energy_recovery_timer >= self.energy_recovery_interval:
-                recovery_rate = 0.5 * (self.energy / self.stats['max_energy'])
+                recovery_rate = (self.energy / self.stats['max_energy']) + 0.1
                 self.energy += recovery_rate
                 self.energy = min(self.energy, self.stats['max_energy'])
 

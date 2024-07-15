@@ -123,10 +123,12 @@ class Enemy(Entity):
         if self.vulnerable:
             self.direction = self.get_player_direction_distance(player)[0]
 
-            if attack_type == 'weapon':
-                self.health -= player.get_full_attack_stat()
-            else:
-                pass
+            # if attack_type == 'weapon':
+                # self.health -= player.get_full_attack_stat(attack_type)
+            # else:
+            print(attack_type)
+            print(player.get_full_attack_stat(attack_type))
+            self.health -= player.get_full_attack_stat(attack_type)
 
             self.hit_time = pygame.time.get_ticks()
             self.vulnerable = False
