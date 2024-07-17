@@ -7,7 +7,7 @@ from utils import *
 
 class Enemy(Entity):
 
-    def __init__(self, monster_name, pos, groups, obstacle_sprites, hit_player, death_effect):
+    def __init__(self, monster_name, pos, groups, obstacle_sprites, hit_player, death_effect, get_exp):
         super().__init__(groups)
 
         self.sprite_type = 'enemy'
@@ -40,11 +40,18 @@ class Enemy(Entity):
         self.attack_cooldown = 500
         self.attack_time = None
         self.hit_player = hit_player
+        self.get_exp = get_exp
 
         # Invincibility setup
         self.vulnerable = True
         self.hit_time = None
         self.invincibility_duration = 300
+
+        # Sounds
+        self.death_sound = pygame.mixer.Sound('../audio/death.wav')
+        self.attack_sound = pygame.mixer.Sound(monster_info['attack_sound'])
+        self.death_sound.set_volume(0.15)
+        self.attack_sound.set_volume(0.15)
 
     def import_graphics(self, name):
         base_path = f'../graphics/monsters/{name}/'
@@ -85,6 +92,7 @@ class Enemy(Entity):
     def actions(self, player):
         if self.status == 'attack':
             self.hit_player(self.attack_damage, self.attack_type)
+            self.attack_sound.play()
         
         elif self.status == 'move':
             self.direction = self.get_player_direction_distance(player)[0]
@@ -122,12 +130,6 @@ class Enemy(Entity):
     def take_damage(self, player, attack_type):
         if self.vulnerable:
             self.direction = self.get_player_direction_distance(player)[0]
-
-            # if attack_type == 'weapon':
-                # self.health -= player.get_full_attack_stat(attack_type)
-            # else:
-            print(attack_type)
-            print(player.get_full_attack_stat(attack_type))
             self.health -= player.get_full_attack_stat(attack_type)
 
             self.hit_time = pygame.time.get_ticks()
@@ -141,6 +143,8 @@ class Enemy(Entity):
         if self.health <= 0:
             self.death_effect(self.rect.center, self.monster_name)
             self.kill()
+            self.death_sound.play()
+            self.get_exp(self.exp)
 
     def update(self):
         self.check_death()

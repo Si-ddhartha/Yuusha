@@ -12,6 +12,7 @@ from weapon import Weapon
 from magic import MagicPlayer
 from enemy import Enemy
 from particles import AnimationPlayer
+from upgrade import Upgrade
 
 class Level:
 
@@ -19,8 +20,7 @@ class Level:
         # Get the display surface
         self.display_surface = pygame.display.get_surface()
 
-        # UI setup
-        self.ui = UI()
+        self.game_paused = False
 
         # Sprite group setup
         self.visible_sprites = YSortCameraGroup()
@@ -31,13 +31,17 @@ class Level:
         # Attack sprites
         self.current_attack = None
 
+        self.create_map()
+
+        # UI setup
+        self.ui = UI()
+        self.upgrade = Upgrade(self.player)
+
         # Particles
         self.animation_player = AnimationPlayer()
 
         # Magic
         self.magic_player = MagicPlayer(self.animation_player)
-
-        self.create_map()
     
     def create_map(self):
         layouts = {
@@ -93,7 +97,8 @@ class Level:
                                         [self.visible_sprites, self.attackable_sprites], 
                                         self.obstacle_sprites, 
                                         self.player_hit, 
-                                        self.enemy_death_effect)
+                                        self.enemy_death_effect,
+                                        self.get_exp)
 
     def create_weapon(self):
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
@@ -140,12 +145,26 @@ class Level:
     def enemy_death_effect(self, pos, enemy_type):
         self.animation_player.animation_particles(pos, [self.visible_sprites], enemy_type)
 
+    def get_exp(self, exp_amount):
+        self.player.exp += exp_amount
+
+    def toggle_menu(self):
+        self.game_paused = not self.game_paused
+
+    def game_over(self):
+        return self.player.health <= 0
+
     def run(self):
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player)
-        self.player_attack()
         self.ui.display(self.player)
+
+        if self.game_paused:
+            self.upgrade.display_menu()
+        
+        else:
+            self.visible_sprites.update()
+            self.visible_sprites.enemy_update(self.player)
+            self.player_attack()
 
 
 # Customizing the Group class

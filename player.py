@@ -12,7 +12,7 @@ class Player(Entity):
 
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
-        self.hitbox = self.rect.inflate(0, -25)
+        self.hitbox = self.rect.inflate(-6, HITBOX_OFFSET['player'])
 
         # Graphics setup
         self.import_player_assets()
@@ -40,6 +40,20 @@ class Player(Entity):
         self.magic_switch_time = None
 
         # Stats
+        self.max_stats = {
+            'max_health': 300,
+            'max_energy': 140,
+            'max_attack': 20,
+            'max_magic': 10,
+            'max_speed': 10
+        }
+        self.upgrade_cost = {
+            'health': 100,
+            'energy': 100,
+            'attack': 100,
+            'magic': 100,
+            'speed': 100
+        }
         self.stats = {
             'max_health': 100,
             'max_energy': 60,
@@ -47,10 +61,10 @@ class Player(Entity):
             'magic': 4,
             'speed': 5
         }
-        self.health = self.stats['max_health'] * 0.5
+        self.health = self.stats['max_health'] * 0.1
         self.energy = self.stats['max_energy']
-        self.speed = self.stats['speed']
-        self.exp = 123456
+        # self.speed = self.stats['speed']
+        self.exp = 0
 
         # Invincibility setup
         self.vulnerable = True
@@ -60,6 +74,10 @@ class Player(Entity):
         # Energy recovery timer
         self.energy_recovery_interval = 1500
         self.energy_recovery_timer = pygame.time.get_ticks()
+
+        # Weapon sound
+        self.weapon_attack_sound = pygame.mixer.Sound('../audio/sword.mp3')
+        self.weapon_attack_sound.set_volume(0.5)
 
         self.obstacle_sprites = obstacle_sprites
     
@@ -109,6 +127,7 @@ class Player(Entity):
                 self.attacking = True
                 self.attack_time = pygame.time.get_ticks()
                 self.create_weapon()
+                self.weapon_attack_sound.play()
             
             # Magic input
             if keys[pygame.K_f]:
@@ -207,7 +226,7 @@ class Player(Entity):
 
     def update(self):
         self.input()
-        self.move(self.speed)
+        self.move(self.stats['speed'])
         self.cooldown()
         self.get_status()
         self.animate()

@@ -65,7 +65,7 @@ class UI:
         return bg_rect
     
     def draw_weapon(self, curr_weapon_index, is_switching):
-        bg_rect = self.draw_selection_box(10, 625 ,is_switching)
+        bg_rect = self.draw_selection_box(10, HEIGHT - 130 ,is_switching)
 
         weapon_surf = self.weapon_graphics[curr_weapon_index]
         weapon_rect = weapon_surf.get_rect(center = bg_rect.center)
@@ -73,7 +73,7 @@ class UI:
         self.display_surface.blit(weapon_surf, weapon_rect)
 
     def draw_magic(self, curr_magic_index, is_switching):
-        bg_rect = self.draw_selection_box(80, 634, is_switching)
+        bg_rect = self.draw_selection_box(80, HEIGHT - 120, is_switching)
 
         magic_surf = self.magic_graphics[curr_magic_index]
         magic_rect = magic_surf.get_rect(center = bg_rect.center)
