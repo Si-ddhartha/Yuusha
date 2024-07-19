@@ -1,3 +1,4 @@
+import sys
 import pygame
 from random import choice, randint
 
@@ -43,6 +44,61 @@ class Level:
         # Magic
         self.magic_player = MagicPlayer(self.animation_player)
     
+    def show_controls_screen(self):
+        self.display_surface.fill((0, 0, 0))
+
+        basic_controls = [
+            "Move: Arrow keys or WASD",
+            "Attack: Space",
+            "Switch Weapon: Q",
+            "Magic (Flame or Heal): F",
+            "Switch Magic: E"
+        ]
+
+        upgrade_menu_controls = [
+            "Toggle Upgrade Menu: U",
+            "Select item: Left or Right key",
+            "Upgrade selected item: Space"
+        ]
+
+        main_heading_font = pygame.font.Font(UI_FONT, 50)
+        main_heading_surf = main_heading_font.render("CONTROLS", False, (255, 255, 255))
+        main_heading_rect = main_heading_surf.get_rect(center = (WIDTH//2, 70))
+        self.display_surface.blit(main_heading_surf, main_heading_rect)
+
+        # Draw line beneath the main heading
+        underline_y = main_heading_rect.bottom - 2
+        pygame.draw.line(self.display_surface, (255, 255, 255), (main_heading_rect.left, underline_y), (main_heading_rect.right, underline_y), 5)
+
+        item_font = pygame.font.Font(UI_FONT, 30)
+        for i, text in enumerate(basic_controls):
+            text_surf = item_font.render(text, False, (0, 0, 255))
+            text_rect = text_surf.get_rect(topleft = (50, (150 + (i * 100))))
+            self.display_surface.blit(text_surf, text_rect)
+
+        for i, text in enumerate(upgrade_menu_controls):
+            text_surf = item_font.render(text, False, (0, 0, 255))
+            text_rect = text_surf.get_rect(topleft = (WIDTH // 2, (150 + (i * 100))))
+            self.display_surface.blit(text_surf, text_rect)
+
+        footer_font = pygame.font.Font(UI_FONT, 20)
+        footer_surf = footer_font.render("Press X to start game", False, (255, 255, 255))
+        footer_rect = footer_surf.get_rect(center = (WIDTH//2, HEIGHT - 50))
+        self.display_surface.blit(footer_surf, footer_rect)
+
+        pygame.display.update()
+
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_x: # Press X to start game
+                        waiting = False
+   
     def create_map(self):
         layouts = {
             'boundary': import_csv_layout('../map/map_FloorBlocks.csv'),

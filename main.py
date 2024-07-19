@@ -17,6 +17,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.level = Level()
+        self.level.show_controls_screen()
 
         # Background music
         self.bg_music = pygame.mixer.Sound('../audio/main.ogg')
@@ -26,9 +27,11 @@ class Game:
     def fade_out(self):
         fade_surface = pygame.Surface((WIDTH, HEIGHT))
         fade_surface.fill((0, 0, 0))
-        for alpha in range(0, 255):  # Adjust the step value for speed of fade
+
+        for alpha in range(0, 255, 2):  # Adjust the step value for speed of fade
             fade_surface.set_alpha(alpha)
             self.screen.blit(fade_surface, (0, 0))
+            
             pygame.display.update()
             pygame.time.delay(20)  # Adjust the delay for smoothness
 
@@ -38,23 +41,23 @@ class Game:
 
         # Display a game over message
         game_over_font = pygame.font.Font(UI_FONT, 74)
-        game_over_surf = game_over_font.render("Game Over", False, (255, 0, 0))
+        game_over_surf = game_over_font.render("Game Over", False, (255, 255, 255))
         game_over_rect = game_over_surf.get_rect(center=(WIDTH//2, HEIGHT//3))
         self.screen.blit(game_over_surf, game_over_rect)
 
         option_font = pygame.font.Font(UI_FONT, 50)
+
         quit_surf = option_font.render("QUIT (Q)", False, (255, 0, 0))
         quit_rect = quit_surf.get_rect(center = game_over_rect.center + pygame.math.Vector2(0, 120))
         self.screen.blit(quit_surf, quit_rect)
 
-        # option_font = pygame.font.Font(UI_FONT, 50)
         restart_surf = option_font.render("RESTART (R)", False, (0, 255, 0))
         restart_rect = restart_surf.get_rect(center = game_over_rect.center + pygame.math.Vector2(0, 240))
         self.screen.blit(restart_surf, restart_rect)
 
         pygame.display.update()
 
-        # Waiting for user input to restart the game
+        # Waiting for user input
         waiting = True
         while waiting:
             for event in pygame.event.get():

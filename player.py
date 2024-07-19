@@ -61,9 +61,8 @@ class Player(Entity):
             'magic': 4,
             'speed': 5
         }
-        self.health = self.stats['max_health'] * 0.1
+        self.health = self.stats['max_health']
         self.energy = self.stats['max_energy']
-        # self.speed = self.stats['speed']
         self.exp = 0
 
         # Invincibility setup
@@ -72,7 +71,7 @@ class Player(Entity):
         self.invincibility_duration = 500
 
         # Energy recovery timer
-        self.energy_recovery_interval = 1500
+        self.energy_recovery_interval = 1000
         self.energy_recovery_timer = pygame.time.get_ticks()
 
         # Weapon sound
@@ -218,7 +217,7 @@ class Player(Entity):
 
         if self.energy < self.stats['max_energy']:
             if current_time - self.energy_recovery_timer >= self.energy_recovery_interval:
-                recovery_rate = (self.energy / self.stats['max_energy']) + 0.1
+                recovery_rate = (1.5 * (self.energy / self.stats['max_energy'])) + 0.5
                 self.energy += recovery_rate
                 self.energy = min(self.energy, self.stats['max_energy'])
 
