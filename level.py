@@ -14,6 +14,7 @@ from magic import MagicPlayer
 from enemy import Enemy
 from particles import AnimationPlayer
 from upgrade import Upgrade
+from flame import Flame
 
 class Level:
 
@@ -131,6 +132,8 @@ class Level:
 
                             if col == '23': # Snow grass
                                 Tile((x, y), [self.visible_sprites, self.obstacle_sprites, self.attackable_sprites], 'grass', object_img)
+                            elif col == '22': # Blue flame
+                                Flame((x, y), [self.visible_sprites, self.obstacle_sprites], 'object')
                             else:
                                 Tile((x, y), [self.visible_sprites, self.obstacle_sprites], 'object', object_img)
 
