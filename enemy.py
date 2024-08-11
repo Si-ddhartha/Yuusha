@@ -26,9 +26,11 @@ class Enemy(Entity):
         # Stats
         self.monster_name = monster_name
         monster_info = enemy_data[monster_name]
-        self.health = monster_info['health']
+        self.max_health = monster_info['health']
+        self.health = self.max_health
         self.exp = monster_info['exp']
-        self.speed = monster_info['speed']
+        self.normal_speed = monster_info['speed']
+        self.speed = self.normal_speed
         self.attack_damage = monster_info['damage']
         self.attack_type = monster_info['attack_type']
         self.attack_radius = monster_info['attack_radius']
@@ -47,6 +49,11 @@ class Enemy(Entity):
         self.hit_time = None
         self.invincibility_duration = 300
 
+        # Flee setup
+        self.safe_distance = 500
+        self.health_threshold = self.max_health * 0.60
+        self.recovery_rate = 0.2
+
         # Sounds
         self.death_sound = pygame.mixer.Sound('../audio/death.wav')
         self.attack_sound = pygame.mixer.Sound(monster_info['attack_sound'])
@@ -56,7 +63,7 @@ class Enemy(Entity):
     def import_graphics(self, name):
         base_path = f'../graphics/monsters/{name}/'
 
-        self.animations = {'idle': [], 'move': [], 'attack': []}
+        self.animations = {'idle': [], 'move': [], 'attack': [], 'flee': []}
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(base_path + animation)
 
@@ -76,7 +83,10 @@ class Enemy(Entity):
     def get_status(self, player):
         distance = self.get_player_direction_distance(player)[1]
 
-        if distance <= self.attack_radius and self.can_attack:
+        if self.health <= self.health_threshold and distance < self.safe_distance:
+            self.status = 'flee'
+
+        elif distance <= self.attack_radius and self.can_attack:
             if self.status != 'attack':
                 self.frame_index = 0
 
@@ -96,9 +106,14 @@ class Enemy(Entity):
         
         elif self.status == 'move':
             self.direction = self.get_player_direction_distance(player)[0]
+
+        elif self.status == 'flee':
+            self.speed = self.normal_speed * 1.5
+            self.health = min(self.health + self.recovery_rate, self.max_health)
         
         else:
             self.direction = pygame.math.Vector2()
+            self.speed = self.normal_speed
 
     def animate(self):
         animation = self.animations[self.status]
