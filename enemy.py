@@ -12,6 +12,7 @@ class Enemy(Entity):
 
         self.sprite_type = 'enemy'
         self.obstacle_sprites = obstacle_sprites
+        self.display_surface = pygame.display.get_surface()
 
         # Graphic setup
         self.import_graphics(monster_name)
@@ -53,6 +54,9 @@ class Enemy(Entity):
         self.safe_distance = 500
         self.health_threshold = self.max_health * 0.60
         self.recovery_rate = 0.2
+
+        # Health bar
+        self.health_bar = pygame.Rect(self.rect.left, self.rect.top - 15, self.rect.width, 10)
 
         # Sounds
         self.death_sound = pygame.mixer.Sound('../audio/death.wav')
@@ -114,6 +118,7 @@ class Enemy(Entity):
         else:
             self.direction = pygame.math.Vector2()
             self.speed = self.normal_speed
+            self.health = min(self.health + self.recovery_rate, self.max_health)
 
     def animate(self):
         animation = self.animations[self.status]
@@ -154,6 +159,25 @@ class Enemy(Entity):
         if not self.vulnerable:
             self.direction *= -self.resistance
 
+    def draw_health_bar(self, camera_offset):
+        # Adjust health bar position by camera offset
+        health_bar_pos = (self.health_bar.left - camera_offset.x, self.health_bar.top - camera_offset.y)
+
+        # Create the background bar
+        bg_bar_rect = pygame.Rect(health_bar_pos, (self.health_bar.width, self.health_bar.height))
+        pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_bar_rect)
+
+        # Convert int stats to pixels
+        ratio = self.health / self.max_health
+        curr_width = self.health_bar.width * ratio
+        curr_rect = pygame.Rect(health_bar_pos, (curr_width, self.health_bar.height))
+
+        # Draw the bar
+        pygame.draw.rect(self.display_surface, HEALTH_COLOR, curr_rect)
+
+        # Draw the border
+        pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_bar_rect, 2)
+
     def check_death(self):
         if self.health <= 0:
             self.death_effect(self.rect.center, self.monster_name)
@@ -168,6 +192,9 @@ class Enemy(Entity):
         self.animate()
         self.cooldown()
 
-    def enemy_update(self, player):
+    def enemy_update(self, player, camera_offset):
         self.get_status(player)
         self.actions(player)
+
+        self.health_bar.topleft = (self.rect.left, self.rect.top - 15) # Update health bar position acc. to enemy posiion
+        self.draw_health_bar(camera_offset)
